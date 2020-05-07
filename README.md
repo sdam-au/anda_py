@@ -146,4 +146,6 @@ This module contains functions for generating, analyzing and visualizing word co
 
 ## Versions history
 
+* 0.0.5 - greek dictionaries included within the package
+* 0.0.5 - experimenting with data inclusion
 * 0.0.4 - docs

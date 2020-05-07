@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: anda
-Version: 0.0.4
+Version: 0.0.6
 Summary: A package collecting various functions to work with ancient Mediterranean datasets (textual, spatial, etc.)
 Home-page: https://github.com/sdam-au/anda
 Author: Vojtech Kase
@@ -154,11 +154,13 @@ Description: # anda
         
         ## Versions history
         
+        * 0.0.5 - greek dictionaries included within the package
+        * 0.0.5 - experimenting with data inclusion
         * 0.0.4 - docs
         
 Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
-Classifier: License :: OSI Approved :: MIT License
+Classifier: License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
 Classifier: Operating System :: OS Independent
 Requires-Python: >=3.4
 Description-Content-Type: text/markdown
