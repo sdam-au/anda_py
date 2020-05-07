@@ -1,0 +1,10 @@
+pandas
+numpy
+bs4
+requests
+nltk
+networkx
+matplotlib
+seaborn
+scipy
+sddk>=1.7

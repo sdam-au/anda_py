@@ -1,0 +1,12 @@
+README.md
+setup.py
+anda/__init__.py
+anda/concs.py
+anda/gr.py
+anda/textnet.py
+anda.egg-info/PKG-INFO
+anda.egg-info/SOURCES.txt
+anda.egg-info/dependency_links.txt
+anda.egg-info/top_level.txt
+anda/data/morpheus_by_lemma.json
+anda/data/morpheus_dict.json
