@@ -32,7 +32,7 @@ def get_sentences(string):
   sentences = [s.strip() for s in re.split("\·|\.|\:|\;", unicodedata.normalize("NFC", string))]
   return sentences
 
-def return_list_of_tokens(word, filter_by_postag=None, involve_unknown=False):
+def return_list_of_tokens(word, filter_by_postag=None, involve_unknown=False, preference="n"):
   word = unicodedata.normalize("NFC", word)
   try:
     list_of_tokens = morpheus_dict[word]
@@ -53,7 +53,19 @@ def return_list_of_tokens(word, filter_by_postag=None, involve_unknown=False):
     except:
       if involve_unknown == False:
         list_of_tokens = []
+    try:
+      # prefer adjectives and nouns over verbs
+      token_letters = [token["p"][0] for token in list_of_tokens]
+      if ("n" or "a" in token_letters) and ("v" in token_letters):
+        list_of_tokens = [token for token in list_of_tokens if token["p"][0] in ["a", "n"]]
+        # prefer nouns over adjectives
+        token_letters = [token["p"][0] for token in list_of_tokens]
+      if "a" and "n" in token_letters:
+        list_of_tokens = [token for token in list_of_tokens if token["p"][0] == "n"]
+    except:
+      pass
   return list_of_tokens
+
 
 def return_all_unique_lemmata(word, filter_by_postag=None, involve_unknown=False):
   list_of_tokens = return_list_of_tokens(word, filter_by_postag=filter_by_postag, involve_unknown=involve_unknown)
