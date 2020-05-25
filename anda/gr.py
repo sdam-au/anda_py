@@ -56,12 +56,9 @@ def return_list_of_tokens(word, filter_by_postag=None, involve_unknown=False, pr
     try:
       # prefer adjectives and nouns over verbs
       token_letters = [token["p"][0] for token in list_of_tokens]
-      if ("n" or "a" in token_letters) and ("v" in token_letters):
-        list_of_tokens = [token for token in list_of_tokens if token["p"][0] in ["a", "n"]]
-        # prefer nouns over adjectives
-        token_letters = [token["p"][0] for token in list_of_tokens]
-      if "a" and "n" in token_letters:
-        list_of_tokens = [token for token in list_of_tokens if token["p"][0] == "n"]
+      if ("n" in token_letters) or ("a" in token_letters):
+        if ("v" in token_letters):
+          list_of_tokens = [token for token in list_of_tokens if token["p"][0] in ["a", "n"]]
     except:
       pass
   return list_of_tokens

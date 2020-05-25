@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="anda",
-    version="0.0.6",
+    version="0.0.8",
     author="Vojtech Kase",
     author_email="vojtech.kase@gmail.com",
     description="A package collecting various functions to work with ancient Mediterranean datasets (textual, spatial, etc.)",

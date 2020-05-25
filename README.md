@@ -66,7 +66,15 @@ print(lemmatized_sentences)
 
 (4) `return_all_unique_lemmata()`goes to the `morpheus_dict` values and returns all unique lemmata.
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+(5) Parameter `filter_by_postag=` (default `None`) enables to sub-select  chosen word types from the tokens, on the basis of first character in the tag "p" . Thus, to choose only  nouns, adjectives, and verbs, you can set  `filter_by_postag=["n", "a", "v"].` PREFERENCE: If verb, noun, and adjective variants are available, only  then  noun and adjective form is returned. If both noun and adjective is available, only noun is returned.
+=======
 (5) Parameter `filter_by_postag=` (default `None`) enables to sub-select  chosen word types from the tokens, on the basis of first character in the tag "p" . Thus, to choose only  nouns, adjectives, and verbs, you can set  `filter_by_postag=["n", "a", "v"].` If a word might be (("n" or "a") & ("v")), then the verb ("v") is omitted (since nouns and adjectives are preferred where available. 
+>>>>>>> 9b42ddb0101345477a6c634e80afc2fca904e3bc
+=======
+(5) Parameter `filter_by_postag=` (default `None`) enables to sub-select  chosen word types from the tokens, on the basis of first character in the tag "p" . Thus, to choose only  nouns, adjectives, and verbs, you can set  `filter_by_postag=["n", "a", "v"].` If a word might be (("n" or "a") & ("v")), then the verb ("v") is omitted (since nouns and adjectives are preferred where available. 
+>>>>>>> 9b42ddb0101345477a6c634e80afc2fca904e3bc
 
 ###  Translation
 
@@ -146,6 +154,7 @@ This module contains functions for generating, analyzing and visualizing word co
 
 ## Versions history
 
+* 0.0.8 - bugs removed
 * 0.0.7 - `filter_by_postag` with preference of nouns and adjectives by default
 * 0.0.6 - greek dictionaries included within the package
 * 0.0.5 - experimenting with data inclusion
