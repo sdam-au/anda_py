@@ -41,8 +41,12 @@ def return_list_of_tokens(word, filter_by_postag=None, involve_unknown=False, pr
       if len(list_of_tokens) < 1:
         list_of_tokens = [{"f":word, "i": "", "b":"", "l":word.lower(), "e":"", "p":"", "d":"", "s":"", "a":""}]
   except:
-    list_of_tokens = [{"f":word, "i": "", "b":"", "l":word.lower(), "e":"", "p":"", "d":"", "s":"", "a":""}]
-
+    try:
+      list_of_tokens = morpheus_dict[word.lower()]
+    except:
+      list_of_tokens = [{"f":word, "i": "", "b":"", "l":word.lower(), "e":"", "p":"", "d":"", "s":"", "a":""}]
+  if word[0].islower():
+    list_of_tokens = [token for token in list_of_tokens if token["l"].islower()]
   if filter_by_postag != None:
     try:
       list_of_tokens_filtered = []
