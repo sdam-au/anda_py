@@ -131,6 +131,7 @@ def tokenize_string(string):
   string = remove_sups(string)
   # tokenization itself
   string_tokenized = string.split()
+  string_tokenized = [re.sub("ʼ$", "", word) for word in string_tokenized]
   string_tokenized = [word for word in string_tokenized if len(word) > 1]
   return string_tokenized
 
