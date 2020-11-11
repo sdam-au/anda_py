@@ -14,6 +14,20 @@ except: # if not, read them from sciencedata
   morpheus_dict = json.loads(requests.get("https://sciencedata.dk/public/" + publicfolder + "/morpheus_dict.json").content)
 
 
+# enrich morpheus by additional data from 
+corpus = pyconll.load.iter_from_url("https://raw.githubusercontent.com/UniversalDependencies/UD_Ancient_Greek-Perseus/master/grc_perseus-ud-train.conllu")
+forms_lemmas_dict = {}
+for sentence in corpus:
+    for token in sentence:
+        forms_lemmas_dict[token.form] = [{"l" : token.lemma, "p" : token.xpos, "s" : ""}]
+        
+missing_in_morpheus = []
+for key in forms_lemmas_dict.keys():
+    try:
+        morpheus_dict[key]
+    except:
+        morpheus_dict[key] = forms_lemmas_dict[key]
+
 
 ### simple replacements
 to_replace_dict={
