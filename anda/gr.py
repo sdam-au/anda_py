@@ -1,4 +1,5 @@
 
+
 import json
 import unicodedata
 import re
@@ -14,6 +15,20 @@ except: # if not, read them from sciencedata
   morpheus_dict = json.loads(requests.get("https://sciencedata.dk/public/" + publicfolder + "/morpheus_dict.json").content)
 
 
+# enrich morpheus by additional data from 
+corpus = pyconll.load.iter_from_url("https://raw.githubusercontent.com/UniversalDependencies/UD_Ancient_Greek-Perseus/master/grc_perseus-ud-train.conllu")
+forms_lemmas_dict = {}
+for sentence in corpus:
+    for token in sentence:
+        forms_lemmas_dict[token.form] = [{"l" : token.lemma, "p" : token.xpos, "s" : ""}]
+        
+missing_in_morpheus = []
+for key in forms_lemmas_dict.keys():
+    try:
+        morpheus_dict[key]
+    except:
+        morpheus_dict[key] = forms_lemmas_dict[key]
+
 
 ### simple replacements
 to_replace_dict={
@@ -25,6 +40,19 @@ to_replace_dict={
     "ὴ" : "η",
     }
 
+# remove numerical superscripts
+sups = ["¹", "²", "³", "⁴","⁵", "⁶", "⁷", "⁰", "⁹"]
+def remove_sups(string):
+    for sup in sups:
+        string = string.replace(sup, "")
+    return string
+
+def grave_to_acute(string):
+    GRAVE = "\u0300"
+    ACUTE = "\u0301"
+    return unicodedata.normalize("NFC", "".join(unicodedata.normalize("NFD", string).replace(GRAVE, ACUTE)))
+
+
 stopwords_string = "αὐτὸς αὐτός γε γὰρ γάρ δ' δαὶ δαὶς δαί δαίς διὰ διά δὲ δέ δὴ δή εἰ εἰμὶ εἰμί εἰς εἴμι κατὰ κατά καὶ καί μετὰ μετά μὲν μέν μὴ μή οἱ οὐ οὐδεὶς οὐδείς οὐδὲ οὐδέ οὐκ οὔτε οὕτως οὖν οὗτος παρὰ παρά περὶ περί πρὸς πρός σὸς σός σὺ σὺν σύ σύν τε τι τις τοιοῦτος τοὶ τοί τοὺς τούς τοῦ τὰ τά τὴν τήν τὶ τὶς τί τίς τὸ τὸν τό τόν τῆς τῇ τῶν τῷ ἀλλ' ἀλλὰ ἀλλά ἀπὸ ἀπό ἂν ἄλλος ἄν ἄρα ἐγὼ ἐγώ ἐκ ἐξ ἐμὸς ἐμός ἐν ἐπὶ ἐπί ἐὰν ἐάν ἑαυτοῦ ἔτι ἡ ἢ ἤ ὁ ὃδε ὃς ὅδε ὅς ὅστις ὅτι ὑμὸς ὑμός ὑπὲρ ὑπέρ ὑπὸ ὑπό ὡς ὥστε ὦ ξύν ξὺν σύν σὺν τοῖς τᾶς την α μην ἃ 𝔚 β δη δι δ᾿ δʼ δ τότ ἀλλʼ ὅσʼ ἐπʼ ιη △ζ ιβ τχ μη ; ὃ γ . ὅταν ποτέ οὐδʼ καθʼ ἀλλ᾿ την α μην ἃ 𝔚 β δη δι δ᾿ δʼ δ τότ ἀλλʼ ὅσʼ ἐπʼ ιη △ζ ιβ τχ μη ; ὃ γ ὅταν ποτέ οὐδʼ καθʼ ἀλλ᾿ την α μην ἃ 𝔚 β δη δι δ᾿ δʼ δ τότ ἀλλʼ ὅσʼ ἐπʼ ιη △ζ ιβ τχ μη ὃ γ ὅταν ποτέ οὐδʼ καθʼ ἀλλ᾿"
 STOPS_LIST = stopwords_string.split()
 
@@ -32,7 +60,7 @@ def get_sentences(string):
   sentences = [s.strip() for s in re.split("\·|\.|\:|\;", unicodedata.normalize("NFC", string))]
   return sentences
 
-def return_list_of_tokens(word, filter_by_postag=None, involve_unknown=False, preference="n"):
+def return_list_of_tokens(word, filter_by_postag=None, involve_unknown=False):
   word = unicodedata.normalize("NFC", word)
   try:
     list_of_tokens = morpheus_dict[word]
@@ -41,12 +69,8 @@ def return_list_of_tokens(word, filter_by_postag=None, involve_unknown=False, pr
       if len(list_of_tokens) < 1:
         list_of_tokens = [{"f":word, "i": "", "b":"", "l":word.lower(), "e":"", "p":"", "d":"", "s":"", "a":""}]
   except:
-    try:
-      list_of_tokens = morpheus_dict[word.lower()]
-    except:
-      list_of_tokens = [{"f":word, "i": "", "b":"", "l":word.lower(), "e":"", "p":"", "d":"", "s":"", "a":""}]
-  if word[0].islower():
-    list_of_tokens = [token for token in list_of_tokens if token["l"].islower()]
+    list_of_tokens = [{"f":word, "i": "", "b":"", "l":word.lower(), "e":"", "p":"", "d":"", "s":"", "a":""}]
+
   if filter_by_postag != None:
     try:
       list_of_tokens_filtered = []
@@ -57,16 +81,7 @@ def return_list_of_tokens(word, filter_by_postag=None, involve_unknown=False, pr
     except:
       if involve_unknown == False:
         list_of_tokens = []
-    try:
-      # prefer adjectives and nouns over verbs
-      token_letters = [token["p"][0] for token in list_of_tokens]
-      if ("n" in token_letters) or ("a" in token_letters):
-        if ("v" in token_letters):
-          list_of_tokens = [token for token in list_of_tokens if token["p"][0] in ["a", "n"]]
-    except:
-      pass
   return list_of_tokens
-
 
 def return_all_unique_lemmata(word, filter_by_postag=None, involve_unknown=False):
   list_of_tokens = return_list_of_tokens(word, filter_by_postag=filter_by_postag, involve_unknown=involve_unknown)
@@ -106,13 +121,18 @@ def lemma_translator(word):
   return translations
 
 def tokenize_string(string):
+  # some cleaning
   string = re.sub(r'[A-Za-z0-9]+', "", string)
   string = re.sub(r'[-,\(\)=\\\?·‖\+;\.\:/\[\]\*—»«\§˘„”\|]+', "", string)
   string = re.sub(r'[^\w\s]','', string)
   for k,v in to_replace_dict.items():
     string = string.replace(k,v)
   string = unicodedata.normalize("NFC", string)
+  string = grave_to_acute(string)
+  string = remove_sups(string)
+  # tokenization itself
   string_tokenized = string.split()
+  string_tokenized = [re.sub("ʼ$", "", word) for word in string_tokenized]
   string_tokenized = [word for word in string_tokenized if len(word) > 1]
   return string_tokenized
 
