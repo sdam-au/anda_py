@@ -132,6 +132,7 @@ def tokenize_string(string):
   string = remove_sups(string)
   # tokenization itself
   string_tokenized = string.split()
+  string_tokenized = [w for w in string_tokenized if not w in STOPS_LIST] 
   string_tokenized = [re.sub("ʼ$", "", word) for word in string_tokenized]
   string_tokenized = [word for word in string_tokenized if len(word) > 1]
   return string_tokenized
@@ -145,6 +146,7 @@ def lemmatize_string(string, all_lemmata=False, filter_by_postag=None, involve_u
     string_lemmatized = [return_first_lemma(word, filter_by_postag=filter_by_postag, involve_unknown=involve_unknown) for word in string_tokenized if word != ""]  
   string_lemmatized = [word for word in string_lemmatized if word != ""]
   string_lemmatized = [re.sub(r'\d', "", w) for w in string_lemmatized if w not in STOPS_LIST]
+  string_tokenized = [w for w in string_tokenized if not w in STOPS_LIST] 
   return string_lemmatized
 
 def get_lemmatized_sentences(string, all_lemmata=False, filter_by_postag=None, involve_unknown=False):
