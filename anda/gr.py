@@ -4,6 +4,7 @@ import json
 import unicodedata
 import re
 import requests
+import pyconll
 
 ### DATA (i.e. greek vocabulary)
 try: # if possible, upload the data from the package
@@ -15,14 +16,33 @@ except: # if not, read them from sciencedata
   morpheus_dict = json.loads(requests.get("https://sciencedata.dk/public/" + publicfolder + "/morpheus_dict.json").content)
 
 
-# enrich morpheus by additional data from 
-corpus = pyconll.load.iter_from_url("https://raw.githubusercontent.com/UniversalDependencies/UD_Ancient_Greek-Perseus/master/grc_perseus-ud-train.conllu")
+# enrich morpheus by additional data from universaldependencies
+
+def encoding(word):
+    return unicodedata.normalize("NFC", word)
+
+# enrich morpheus by additional data from universaldependencies
+
+# PERSEUS corpus
+corpus_perseus = pyconll.load.iter_from_url("https://raw.githubusercontent.com/UniversalDependencies/UD_Ancient_Greek-Perseus/master/grc_perseus-ud-train.conllu")
 forms_lemmas_dict = {}
-for sentence in corpus:
+for sentence in corpus_perseus:
     for token in sentence:
-        forms_lemmas_dict[token.form] = [{"l" : token.lemma, "p" : token.xpos, "s" : ""}]
+        forms_lemmas_dict[encoding(token.form)] = [{"l" : encoding(token.lemma), "p" : token.xpos.lower(), "s" : ""}]
         
-missing_in_morpheus = []
+for key in forms_lemmas_dict.keys():
+    try:
+        morpheus_dict[key]
+    except:
+        morpheus_dict[key] = forms_lemmas_dict[key]
+        
+# PROIEIL corpus
+corpus_proiel = pyconll.load.iter_from_url("https://raw.githubusercontent.com/UniversalDependencies/UD_Ancient_Greek-PROIEL/master/grc_proiel-ud-train.conllu")
+forms_lemmas_dict = {}
+for sentence in corpus_proiel:
+    for token in sentence:
+        forms_lemmas_dict[encoding(token.form)] = [{"l" : encoding(token.lemma), "p" : token.xpos.lower(), "s" : ""}]
+        
 for key in forms_lemmas_dict.keys():
     try:
         morpheus_dict[key]
@@ -66,8 +86,8 @@ def return_list_of_tokens(word, filter_by_postag=None, involve_unknown=False):
     list_of_tokens = morpheus_dict[word]
     if len(list_of_tokens) < 1:
       list_of_tokens = morpheus_dict[word.lower()]
-      if len(list_of_tokens) < 1:
-        list_of_tokens = [{"f":word, "i": "", "b":"", "l":word.lower(), "e":"", "p":"", "d":"", "s":"", "a":""}]
+        if len(list_of_tokens) < 1:
+          list_of_tokens = [{"f":word, "i": "", "b":"", "l":word.lower(), "e":"", "p":"", "d":"", "s":"", "a":""}]
   except:
     list_of_tokens = [{"f":word, "i": "", "b":"", "l":word.lower(), "e":"", "p":"", "d":"", "s":"", "a":""}]
 
@@ -133,7 +153,7 @@ def tokenize_string(string):
   # tokenization itself
   string_tokenized = string.split()
   string_tokenized = [w for w in string_tokenized if not w in STOPS_LIST] 
-  string_tokenized = [re.sub("ʼ$", "", word) for word in string_tokenized]
+  #string_tokenized = [re.sub("ʼ$", "", word) for word in string_tokenized]
   string_tokenized = [word for word in string_tokenized if len(word) > 1]
   return string_tokenized
 
@@ -146,7 +166,6 @@ def lemmatize_string(string, all_lemmata=False, filter_by_postag=None, involve_u
     string_lemmatized = [return_first_lemma(word, filter_by_postag=filter_by_postag, involve_unknown=involve_unknown) for word in string_tokenized if word != ""]  
   string_lemmatized = [word for word in string_lemmatized if word != ""]
   string_lemmatized = [re.sub(r'\d', "", w) for w in string_lemmatized if w not in STOPS_LIST]
-  string_tokenized = [w for w in string_tokenized if not w in STOPS_LIST] 
   return string_lemmatized
 
 def get_lemmatized_sentences(string, all_lemmata=False, filter_by_postag=None, involve_unknown=False):
